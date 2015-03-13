@@ -5,14 +5,13 @@ import traceback
 import json
 
 class AttrDict(namespace.SettableHierarchialBase):
+    """Allow access to dictionary via attributes"""
+
     def __init__(self, basedict=None):
         if basedict is None:
             self.basedict = {}
         else:
             self.basedict = basedict
-
-    def str(self, path):
-        return str(self.pos(path))
 
     def repr(self, path):
         return "<%s(%s)>" % (self.__class__.__name__, ".".join(map(str,path)))
@@ -29,6 +28,12 @@ class AttrDict(namespace.SettableHierarchialBase):
                     return None
             base = base[p]
         return base
+
+    def pos(self, path):
+        return self.descend(path, create=KeyError)
+
+    def str(self, path):
+        return str(self.pos(path))
 
     def get(self, path):
         o = self.descend(path, create=False)
@@ -64,9 +69,6 @@ class AttrDict(namespace.SettableHierarchialBase):
         self.basedict[path] += val
         return None
 
-    def pos(self, path):
-        return self.descend(path, create=KeyError)
-
 j = json.loads('{"a": 1, "b": "blat", "c": {"d": "e"}}')
 ad = AttrDict(j)
 
@@ -95,8 +97,8 @@ print(+ad is j)
 print(sorted(ad.c.x))
 for a in ad.c.x:
     q = ad.c.x[a]
-    print("  ad.c.x.",a,"==",type(q), str(q))
+    print("  ad.c.x.%s == (%s) %s" % (a, type(q), str(q)))
 
-print(type(ad), type(ad).__name__)
+print("%s, %s" % (type(ad), type(ad).__name__))
 
 print("SUCCESS")
