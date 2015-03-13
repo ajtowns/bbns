@@ -2,6 +2,7 @@
 
 import inspect
 import functools
+import sys
 
 __all__ = ["BaseMeta", "BaseBase",
            "HierarchialBase", "SettableHierarchialBase"]
@@ -161,6 +162,8 @@ def _make_namespace(cls, name=None):
     Namespace.__init__ = init
 
     Namespace.__name__ = name
+    Namespace.__qualname__ = name
+    Namespace.__module__ = cls.__module__
 
     def namespace(self, path=None):
         """Used to create a new Namespace object from the Base class"""
@@ -180,13 +183,20 @@ class BaseMeta(type):
             nsname = nmspc["__namespace_name__"]
         else:
             if "__no_clever_meta__" in nmspc:
-                clsname = name
-                nsname = name[:-4]
+                if name.endswith("Base"):
+                    clsname = name
+                    nsname = name[:-4]
+                else:
+                    clsname = name
+                    nsname = name + "NS"
             else:
                 clsname = name + "Base"
                 nsname = name
 
         cls = type.__new__(mcls, clsname, bases, nmspc)
+        if clsname != name and sys.version_info[0] > 2:
+            cls.__qualname__ = clsname
+
         NS, new = _make_namespace(cls, name=nsname)
         cls.Namespace = NS
         cls.namespace = new
