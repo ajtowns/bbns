@@ -10,12 +10,14 @@ def sig_adapt(sigfn, dropargs=None, name=None):
        making the help of generic wrapper functions match the functions
        they're wrapping. For example:
 
-           def foo(a, b, c, d=None):
-               pass
+       .. code::
 
-           @sig_adapt(foo)
-           def myfn(*args, **kwargs):
-               pass
+          def foo(a, b, c, d=None):
+              pass
+
+          @sig_adapt(foo)
+          def myfn(*args, **kwargs):
+              pass
 
        The optional "name" parameter allows renaming the function to something
        different to the original function's name.
