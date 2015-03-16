@@ -104,28 +104,29 @@ class BaseMeta(type):
             return NS
 
     @classmethod
-    def deferfn(mcls, cls, nscls, basefn, inplace=False):
-        if not hasattr(cls, basefn):
+    def deferfn(mcls, cls, nscls, basefnname, inplace=False):
+        if not hasattr(cls, basefnname):
             return # not implemented so nothing to do
+
+        basefn = getattr(cls, basefnname)
 
         if not inplace:
             def fn(self, *args, **kwargs):
-                return getattr(self._Namespace__base, basefn)(
-                        self._Namespace__path, *args, **kwargs)
+                return basefn(self._Namespace__base, self._Namespace__path,
+                        *args, **kwargs)
         else:
             def fn(self, *args, **kwargs):
-                r = getattr(self._Namespace__base, basefn)(
-                        self._Namespace__path, *args, **kwargs)
+                r = basefn(self._Namespace__base, self._Namespace__path,
+                        *args, **kwargs)
                 if r is None:
                     r = self
                 return r
 
-        clsf = getattr(cls, basefn)
-        fname = "__%s__" % (basefn,)
-        if basefn == "bool" and sys.version_info[0] == 2:
+        fname = "__%s__" % (basefnname,)
+        if basefnname == "bool" and sys.version_info[0] == 2:
             fname = "__nonzero__"
 
-        fn = sig_adapt(clsf, dropargs=(1,), name=fname)(fn)
+        fn = sig_adapt(basefn, dropargs=(1,), name=fname)(fn)
 
         setattr(nscls, fname, fn)
         return fn
