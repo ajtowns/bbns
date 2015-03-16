@@ -12,7 +12,7 @@ class AttrDict(namespace.SettableHierarchialBase):
             self.basedict = basedict
 
     def repr(self, path):
-        return "<%s(%s)>" % (self.__class__.__name__, ".".join(map(str,path)))
+        return "<%s(%s)>" % (self.Namespace.__name__, ".".join(map(str,path)))
 
     def descend(self, path, create=True):
         base = self.basedict

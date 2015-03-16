@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import py.test
 import attrdict
 import traceback
 import json
@@ -7,33 +8,27 @@ import json
 j = json.loads('{"a": 1, "b": "blat", "c": {"d": "e"}}')
 ad = attrdict.AttrDict(j)
 
-print(ad.c.d)
-print(repr(ad.foo.bar))
-ad.foo.bar = "hello"
-ad.foo.bar += ", world"
-ad.foo.baz = "yaarrrr"
-print(+ad.foo)
-print(+ad)
-try:
-    print(+ad.c.x.y.z)
-except KeyError as e:
-    traceback.print_exc()
-ad.c.x.y.z = 3
-del ad.foo.bar
-print(+ad)
-del ad.foo
-print(+ad)
-print("****")
-try:
-    del ad.bar.baz
-except KeyError as e:
-    traceback.print_exc()
-print(+ad is j)
-print(sorted(ad.c.x))
-for a in ad.c.x:
-    q = ad.c.x[a]
-    print("  ad.c.x.%s == (%s) %s" % (a, type(q), str(q)))
+def test_manipulation():
+    assert ad.c.d == "e"
+    assert repr(ad.foo.bar) == "<AttrDict(foo.bar)>"
 
-print("%s, %s" % (type(ad), type(ad).__name__))
+    ad.foo.bar = "hello"
+    ad.foo.bar += ", world"
+    ad.foo.baz = "yaarrrr"
 
-print("SUCCESS")
+    assert +ad.foo == {"bar": "hello, world", "baz": "yaarrrr"}
+    py.test.raises(KeyError, "str(ad.c.x.y.z)")
+
+    ad.c.x.y.z = 3
+    assert ad.c.x.y.z == 3
+    del ad.foo.bar
+    assert +ad.foo == {"baz": "yaarrrr"}
+    print(+ad)
+    del ad.foo
+
+    del ad.c.x
+    assert +ad == {"a": 1, "b": "blat", "c": {"d": "e"}}
+
+    py.test.raises(KeyError, "del ad.bar.baz")
+
+    assert +ad is j
